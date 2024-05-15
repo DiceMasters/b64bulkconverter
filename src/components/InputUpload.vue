@@ -16,6 +16,10 @@ const handleFileChange = (e: Event) => {
     emit('change', files.value)
   }
 }
+
+const onFileRemove = (index: number) => {
+  files.value = files.value.filter((_, _index) => _index !== index)
+}
 </script>
 
 <template>
@@ -27,9 +31,13 @@ const handleFileChange = (e: Event) => {
     </label>
 
     <div v-show="files.length" class="c-input-uploader__list">
-      <div v-for="file in files" class="c-input-uploader__item">
+      <div v-for="(file, index) in files" class="c-input-uploader__item">
         <span>
           {{ file.name }}
+
+          <button class="c-input-uploader__item-remove" @click="onFileRemove(index)">
+            X
+          </button>
         </span>
       </div>
     </div>
@@ -87,7 +95,9 @@ const handleFileChange = (e: Event) => {
     position: relative;
 
     span {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
 
       background-color: #5E35B1;
 
@@ -123,6 +133,25 @@ const handleFileChange = (e: Event) => {
 
       z-index: 5;
     }
+  }
+
+  &__item-remove {
+    width: 25px;
+    height: 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: transparent;
+
+    padding: 0;
+    border: 5px solid #303F9F;
+
+    font-weight: 700;
+    color: #303F9F;
+
+    cursor: pointer;
   }
 }
 </style>
