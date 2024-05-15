@@ -1,20 +1,28 @@
 <script setup lang="ts">
 import {ref, type Ref, watch} from 'vue'
 
+type TEncodedFile = {
+  b64: string
+  name: string
+}
+
 const props = withDefaults(defineProps<{
   files: File[]
 }>(), {
   files: () => []
 })
 
-const readyFiles: Ref<string[]> = ref([])
+const readyFiles: Ref<TEncodedFile[]> = ref([])
 
 const encode = async (_files: File[]) => {
   const promises = _files.map(_ => convertToBase64Async(_))
   const result = await Promise.all(promises)
 
   if (isBase64Strings(result)) {
-    readyFiles.value = result
+    readyFiles.value = result.map((item ,index) => ({
+      name: props.files[index].name,
+      b64: item
+    }))
   }
 }
 
@@ -39,13 +47,19 @@ watch(() => props.files, encode)
 <template>
   <div class="c-encoder">
     <div class="c-encoder__list">
-      <div v-for="item in readyFiles" :key="item.substring(0, 20)" class="c-encoder__item">
-        <div class="c-encoder__preview">
-          <img :src="item" alt="">
+      <div v-for="item in readyFiles" :key="item.name" class="c-encoder__item">
+        <div class="c-encoder__item-main">
+          <div class="c-encoder__preview">
+            <img :src="item.b64" :alt="item.name">
+          </div>
+
+          <div class="c-encoder__name">
+            {{ item.name }}
+          </div>
         </div>
 
         <div class="c-encoder__action">
-          <button class="c-encoder__button" @click="onCopyClick(item)">
+          <button class="c-encoder__button" @click="onCopyClick(item.b64)">
             COPY!
           </button>
         </div>
@@ -122,6 +136,17 @@ watch(() => props.files, encode)
     color: #303F9F;
 
     cursor: pointer;
+  }
+
+  &__item-main {
+    display: flex;
+    gap: 12px;
+  }
+
+  &__name {
+    font-size: 21px;
+    font-weight: 500;
+    color: #303F9F;
   }
 }
 </style>
